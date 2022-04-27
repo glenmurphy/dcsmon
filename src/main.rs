@@ -2,6 +2,9 @@ use reqwest::header::HeaderMap;
 use serde::{Deserialize};
 use clap::Parser;
 
+/**
+ * Structs for serde to be able to deserealize the json
+ */
 #[derive(Deserialize)]
 #[allow(non_snake_case)]
 struct Server {
@@ -30,6 +33,9 @@ struct Servers {
     //MY_SERVERS : Vec<Server>
 }
 
+/**
+ * Config for clap's command line argument thingy
+ */
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -46,6 +52,10 @@ struct Args {
     filter: String,
 }
 
+/**
+ * Turns the DCS goobledegook into something usable in a terminal; won't yet correct
+ * for the spaces DCS adds to allow line breaks on its website
+ */
 fn sanitize_name(name: &str) -> String {
     let mut fixed = name.replace(|c: char| !c.is_ascii(), "");
     fixed = fixed.replace("&amp;", "&");
@@ -57,6 +67,8 @@ fn sanitize_name(name: &str) -> String {
 fn display_servers(servers: &Servers, filter : &String) {
     println!("\n\x1b[93m{:36.36}   {:30.30}   {}\x1b[0m", "Name", "Mission", "Players");
 
+    // TODO: display MY_SERVERS so server admins can use this as a simple tool
+
     for server in &servers.SERVERS {
         if server.NAME.to_lowercase().contains(filter) {
             println!("{:36.36}   {:30.30}   {}", 
@@ -67,6 +79,10 @@ fn display_servers(servers: &Servers, filter : &String) {
     }
 }
 
+/**
+ * As get_all("set-cookie") doesn't work, we have to manually parse the separate
+ * set-cookie lines into a single cookie string.
+ */
 fn parse_cookie(headers: &HeaderMap) -> String {
     let mut cookies = vec![];
     for (key, value) in headers.iter() {
@@ -77,6 +93,9 @@ fn parse_cookie(headers: &HeaderMap) -> String {
     cookies.join(", ")
 }
 
+/**
+ * Gets a login cookie from the DCS website
+ */
 async fn login(username: String, password: String) -> Result<String, &'static str> {
     if username.is_empty() || password.is_empty() {
         return Err("No username or password");
@@ -100,6 +119,9 @@ async fn login(username: String, password: String) -> Result<String, &'static st
     Ok(cookies)
 }
 
+/**
+ * Gets the current list of servers from the DCS website
+ */
 async fn get_servers(cookies: String) -> Result<Servers, &'static str> {
     let mut headers = HeaderMap::new();
     headers.insert(reqwest::header::COOKIE, cookies.parse().unwrap());
@@ -115,21 +137,23 @@ async fn get_servers(cookies: String) -> Result<Servers, &'static str> {
     Ok(servers)
 }
 
+/**
+ * We don't really need async for this, especially with the blocking library available,
+ * but it's nice to have it for the future (if we want to display progress), and it 
+ * doesn't impact the binary size
+ */
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
-    let filter = args.filter.to_lowercase();
 
-    // Do login
     let cookies = login(args.username, args.password).await;
     if let Err(msg) = cookies {
         println!("\x1b[31mLogin failed: {}\x1b[0m", msg);
         return Ok(());
     }
  
-    // Request server list
     match get_servers(cookies.unwrap()).await {
-        Ok(servers) => display_servers(&servers, &filter),
+        Ok(servers) => display_servers(&servers, &args.filter.to_lowercase()),
         Err(msg) => println!("\x1b[31mFailed to get server list: {}\x1b[0m", msg)
     }
 
