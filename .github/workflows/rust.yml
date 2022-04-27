@@ -14,8 +14,6 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --verbose --release
       - name: Run tests
         run: cargo test --verbose
       - uses: manoadamro/rust-release@v1
