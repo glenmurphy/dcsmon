@@ -29,15 +29,26 @@ fn get_cookie(headers: &HeaderMap) -> String {
     cookies.join(", ")
 }
 
+fn sanitize_name(name: &str) -> String {
+    let mut fixed = name.replace(|c: char| !c.is_ascii(), "");
+    fixed = fixed.replace("&amp;", "&");
+    fixed = fixed.replace("&gt;", ">");
+    fixed = fixed.replace("&lt;", "<");
+    fixed.trim().to_string()
+}
+
 fn display_server(server: &Value) {
-    let name = server["NAME"].as_str().unwrap().replace(|c: char| !c.is_ascii(), "");
-    println!("{:40.40} | {:30.30} | {}", 
-        name.trim(),
-        server["MISSION_NAME"].as_str().unwrap(),
+    println!("{:36.36} | {:30.30} | {}", 
+        sanitize_name(server["NAME"].as_str().unwrap()),
+        sanitize_name(server["MISSION_NAME"].as_str().unwrap()),
         server["PLAYERS"].as_str().unwrap().parse::<i32>().unwrap() - 1);
 }
 
 fn display_servers(servers: &Value, filter : &String) {
+    println!("");
+    println!("{:36.36} | {:30.30} | {}", "Name", "Mission", "Players");
+    println!("{:->36.36}-+-{:->30.30}-+--------", "", "");
+
     for server in servers["SERVERS"].as_array().unwrap() {
         let name = server["NAME"].as_str().unwrap().to_lowercase();
         if name.contains(filter) {
@@ -60,9 +71,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Do login
     let mut login_headers = HeaderMap::new();
-    //login_headers.insert("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9".parse().unwrap());
-    //login_headers.insert("accept-language", "en-US,en;q=0.9".parse().unwrap());
-    //login_headers.insert("cache-control", "max-age=0".parse().unwrap());
     login_headers.insert("content-type", "application/x-www-form-urlencoded".parse().unwrap());
 
     let client = reqwest::Client::new();
