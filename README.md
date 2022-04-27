@@ -1,7 +1,7 @@
 ## dcsmon
 ![screenshot](./screenshot.png)
 
-Command-line server browser for Digital Combat Simulator
+Command-line server browser for [Digital Combat Simulator](https://digitalcombatsimulator.com/)
 
 ## Usage
 
@@ -28,4 +28,4 @@ Requires [Rust](https://www.rust-lang.org/tools/install)
     cargo run -- -u username -p password
     cargo build --release
 
-The last command will create the dcsmon.exe in your dcsmon/target/release directory
+The last command will create dcsmon.exe in your dcsmon/target/release directory - move it to whereever you wish
