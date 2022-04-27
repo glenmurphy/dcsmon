@@ -1,8 +1,35 @@
 use reqwest::header::HeaderMap;
-use serde_json::{Value};
+use serde::{Deserialize};
 use clap::Parser;
 
-/// Simple program to greet a person
+#[derive(Deserialize)]
+#[allow(non_snake_case)]
+struct Server {
+    NAME: String,
+    MISSION_NAME: String,
+    PLAYERS: String,
+
+    //IP_ADDRESS: String,
+    //PORT: String,
+    //MISSION_TIME: String,
+    //PLAYERS_MAX: String,
+    //PASSWORD: String,
+    //DESCRIPTION: String,
+    //DCS_VERSION: String,
+    //MISSION_TIME_FORMATTED: String,
+}
+
+#[derive(Deserialize)]
+#[allow(non_snake_case)]
+struct Servers {
+    SERVERS : Vec<Server>,
+
+    //SERVERS_MAX_COUNT: i32,
+    //SERVERS_MAX_DATE: String,
+    //PLAYERS_COUNT: i32,
+    //MY_SERVERS : Vec<Server>
+}
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -37,20 +64,20 @@ fn sanitize_name(name: &str) -> String {
     fixed.trim().to_string()
 }
 
-fn display_server(server: &Value) {
+fn display_server(server: &Server) {
     println!("{:36.36} | {:30.30} | {}", 
-        sanitize_name(server["NAME"].as_str().unwrap()),
-        sanitize_name(server["MISSION_NAME"].as_str().unwrap()),
-        server["PLAYERS"].as_str().unwrap().parse::<i32>().unwrap() - 1);
+        sanitize_name(server.NAME.as_str()),
+        sanitize_name(server.MISSION_NAME.as_str()),
+        server.PLAYERS.as_str().parse::<i32>().unwrap() - 1);
 }
 
-fn display_servers(servers: &Value, filter : &String) {
+fn display_servers(servers: &Servers, filter : &String) {
     println!("");
     println!("{:36.36} | {:30.30} | {}", "Name", "Mission", "Players");
     println!("{:->36.36}-+-{:->30.30}-+--------", "", "");
 
-    for server in servers["SERVERS"].as_array().unwrap() {
-        let name = server["NAME"].as_str().unwrap().to_lowercase();
+    for server in &servers.SERVERS {
+        let name = server.NAME.as_str().to_lowercase();
         if name.contains(filter) {
             display_server(&server);
         }
@@ -95,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .headers(server_headers)
         .send()
         .await?
-        .json::<Value>()
+        .json::<Servers>()
         .await?;
 
     display_servers(&req, &filter);
