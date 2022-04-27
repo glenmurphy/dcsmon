@@ -9,11 +9,15 @@ Download the latest dcsmon.exe executable from the [releases](https://github.com
 
 Use your DCS username and password
 
-    dcsmon.exe -u username -p password
+    dcsmon -u username -p password
 
-Filter on server names using the -f command line
+Filter on server names using the -f option
 
-    dcsmon.exe -u username -p password -f australia
+    dcsmon -u username -p password -f australia
+
+Other options may be added later, see them with
+
+    dcsmon --help
 
 ## Develop
 
