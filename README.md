@@ -22,4 +22,7 @@ Requires [Rust](https://www.rust-lang.org/tools/install)
 
     git clone https://github.com/glenmurphy/dcsmon.git
     cd dcsmon
-    cargo build
+    cargo run -- -u username -p password
+    cargo build --release
+
+The last command will create the dcsmon.exe in your dcsmon/target/release directory
