@@ -3,12 +3,11 @@
 
 Command-line server browser for Digital Combat Simulator
 
-## Installation
+## Usage
 
 Download the latest dcsmon.exe executable from the [releases](https://github.com/glenmurphy/dcsmon/releases) page
 
-## Usage
-Uses your DCS username and password
+Use your DCS username and password
 
     dcsmon.exe -u username -p password
 
