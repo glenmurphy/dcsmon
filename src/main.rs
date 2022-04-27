@@ -33,15 +33,15 @@ struct Servers {
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-    /// Your DCS username
+    /// Your DCS username (required)
     #[clap(short)]
     username: String,
 
-    /// Your DCS password
+    /// Your DCS password (required)
     #[clap(short)]
     password: String,
 
-    /// A server name search filter
+    /// Optional server name search filter
     #[clap(short, default_value(""))]
     filter: String,
 }
@@ -64,22 +64,15 @@ fn sanitize_name(name: &str) -> String {
     fixed.trim().to_string()
 }
 
-fn display_server(server: &Server) {
-    println!("{:36.36} | {:30.30} | {}", 
-        sanitize_name(server.NAME.as_str()),
-        sanitize_name(server.MISSION_NAME.as_str()),
-        server.PLAYERS.as_str().parse::<i32>().unwrap() - 1);
-}
-
 fn display_servers(servers: &Servers, filter : &String) {
-    println!("");
-    println!("{:36.36} | {:30.30} | {}", "Name", "Mission", "Players");
-    println!("{:->36.36}-+-{:->30.30}-+--------", "", "");
+    println!("\n\x1b[93m{:36.36}   {:30.30}   {}\x1b[0m", "Name", "Mission", "Players");
 
     for server in &servers.SERVERS {
-        let name = server.NAME.as_str().to_lowercase();
-        if name.contains(filter) {
-            display_server(&server);
+        if server.NAME.to_lowercase().contains(filter) {
+            println!("{:36.36}   {:30.30}   {}", 
+                sanitize_name(&server.NAME),
+                sanitize_name(&server.MISSION_NAME),
+                server.PLAYERS.parse::<i32>().unwrap() - 1);
         }
     }
 }
