@@ -1,0 +1,19 @@
+[package]
+name = "dcsmon"
+version = "0.1.0"
+edition = "2021"
+authors = ["Glen Murphy <glen@glenmurphy.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+clap = { version = "3.1.12", features = ["derive"] }
+
+[profile.release]
+lto = true
+panic = "abort"
+opt-level = "s"
+strip = "symbols"
